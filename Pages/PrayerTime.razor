@@ -1,0 +1,169 @@
+@using PrayerTimes.Services
+@inject LocationService LocationService
+@inject PrayerTimeService PrayerTimeService
+
+@page "/"
+
+<MudContainer Style="background-image: url('/images/Background2.jpg'); 
+                     background-size: cover; 
+                     background-repeat: no-repeat; 
+                     background-position: center; 
+                     height: 100vh;
+                     display: flex
+                     flex-direction: column
+                     justify-content: center
+                     align-items: center">
+    @if (_prayerTimes == null)
+    {
+        <MudText Typo="Typo.h5" Align="Align.Center" Style="color: white;">Yuklanmoqda...</MudText>
+    }
+    else
+    {
+        @foreach (var item in timesdict!)
+        {
+            bool isTimeClose = (item.Key == key); 
+            if(isTimeClose)
+            {
+                <MudCard Class="my-2" 
+                    Style="background-color: #167803;
+                        color: white; padding: 10px; border-radius: 8px; height: 8vh;">
+                    <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
+                        <div Style="display: flex; align-items: center;">
+                            <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
+                        </div>
+                        <MudText Typo="Typo.h5" Style="margin: 0;">@item.Value</MudText>
+                    </MudCardContent>
+                </MudCard>
+            }
+            else
+            {
+                <MudCard Class="my-2" 
+                    Style="background-color: rgba(0, 0, 0, 0.7);
+                        color: white; padding: 10px; border-radius: 8px; height: 8vh;">
+                    <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
+                        <div Style="display: flex; align-items: center;">
+                            <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
+                        </div>
+                        <MudText Typo="Typo.h5" Style="margin: 0;">@item.Value</MudText>
+                    </MudCardContent>
+                </MudCard>
+            }
+        }
+        <MudCard Class="my-2" 
+         Style="background-color: rgb(250, 242, 2);
+                color: rgb(0, 0, 0); 
+                padding: 10px; 
+                border-radius: 8px; 
+                height: 15vh; 
+                width: 100%; 
+                position: absolute; 
+                bottom: 60px; 
+                left: 0; 
+                box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);">
+            <MudCardContent Style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 120%;">
+                <MudText Typo="Typo.h4" Style="font-family: 'Roboto', sans-serif; font-weight: bold;">Keyingi   namoz: @key</MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
+                    @nextPrayerCountdown dan keyin
+                </MudText>
+                <MudText Typo="Typo.h6" Align="Align.Center" Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
+                    Hozirgi  vaqt: @currentTime
+                </MudText>
+            </MudCardContent>
+        </MudCard>
+    }
+
+    <MudButton Variant="Variant.Filled" 
+           EndIcon="@Icons.Material.Filled.Send" 
+           Color="Color.Info"
+           Href="https://t.me/damyr_embergenoff"
+           Target="_blank"
+           Style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #00B8D4; color: white;">
+    Send
+</MudButton>
+
+
+
+    @* <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton> *@
+</MudContainer>
+
+
+@code {
+    private PrayerTimeService.PrayerTimes? _prayerTimes;
+    private Dictionary<string, string>? timesdict;
+    private string currentTime = DateTime.Now.ToString("HH:mm:ss");
+    private Timer? timer;
+    private string? key;
+    private string nextPrayerCountdown = "";
+
+    // Sahifa yuklanganda avtomatik ravishda bu metodni chaqirish
+    protected override async Task OnInitializedAsync()
+    {
+        await GetPrayerTimes();
+        StartTimer(); // Timerni boshlash
+    }
+
+    private async Task GetPrayerTimes()
+    {
+        try
+        {
+            var (latitude, longitude) = await LocationService.GetUserLocationAsync();
+            _prayerTimes = await PrayerTimeService.GetPrayerTimesAsync(latitude, longitude);
+            timesdict = new Dictionary<string, string>
+            {
+                { "Fajr", _prayerTimes?.Fajr! },
+                { "Sunrise", _prayerTimes?.Sunrise! },
+                { "Dhuhr", _prayerTimes?.Dhuhr! },
+                { "Asr", _prayerTimes?.Asr! },
+                { "Maghrib", _prayerTimes?.Maghrib! },
+                { "Isha", _prayerTimes?.Isha! },
+            };
+            UpdateNextPrayerTime();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Xatolik: " + ex.Message);
+        }
+    }
+
+    private void UpdateNextPrayerTime()
+    {
+        bool isPrayerTimeClose = false;
+        TimeSpan timeDifference = TimeSpan.MaxValue;
+        foreach (var item in timesdict!)
+        {
+            if (DateTime.Parse(item.Value) > DateTime.Now)
+            {
+                var diff = GetTimeDifferent(DateTime.Parse(item.Value));
+                if (isPrayerTimeClose is false || diff < timeDifference)
+                {
+                    timeDifference = diff;
+                    key = item.Key;
+                    nextPrayerCountdown = $"{diff.Hours} soat {diff.Minutes} daqiqa";
+                    isPrayerTimeClose = true;
+                }
+            }
+        }
+    }
+
+    private TimeSpan GetTimeDifferent(DateTime inputTime)
+    {
+        return inputTime - DateTime.Now;
+    }
+
+    private void StartTimer()
+    {
+        timer = new Timer(UpdateCurrentTime, null, 0, 1000);
+    }
+
+    private void UpdateCurrentTime(object? state)
+    {
+        currentTime = DateTime.Now.ToString("HH:mm:ss");
+        UpdateNextPrayerTime(); // Har soniyada eng yaqin namozni yangilash
+        InvokeAsync(StateHasChanged); // UI ni yangilash
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose(); // Timerni tozalash
+    }
+}
