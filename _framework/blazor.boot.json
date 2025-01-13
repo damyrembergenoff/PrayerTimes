@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "PrayerTimes",
   "resources": {
-    "hash": "sha256-rlO5/wvS3uYiBiHsI5Q12wBI1OHtdBpSmckaS8V9MO8=",
+    "hash": "sha256-gc80VJT4tJWVNZdNtiqLIYXuKdrbg6Lqs9ILa93SYso=",
     "jsModuleNative": {
       "dotnet.native.8.0.11.n1sf6xr5tz.js": "sha256-VdKq87/z5NIxZKmuM+fv38XF+RcEb/bg3jVBwQSfwP4="
     },
@@ -37,7 +37,7 @@
       "Microsoft.JSInterop.wasm": "sha256-G5EovQxlZURFdmM9vnN4JVyIq5kUJC5BmgakAO6Krdg=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-2bohIT7/qEC9nPtjBrESwyddQ86eqIfABSFaK7lb55A=",
       "MudBlazor.wasm": "sha256-QLa6Z74b04BJhOPF+cs9/gdosuj4ToYmWfunGTJ1rkU=",
-      "PrayerTimes.wasm": "sha256-HaKYKbha8G826qym8vxwe4kpgU5fQPR96jVMQ3/d2Fo=",
+      "PrayerTimes.wasm": "sha256-DEjc40flPEw3pnxQVrrzrmWpt8hL7XNj4mykEkLC9D4=",
       "System.Collections.Concurrent.wasm": "sha256-gbg3D+lJNLgMXqz6HWquL4iAZJuU2mdxL2amP7s19ME=",
       "System.Collections.Immutable.wasm": "sha256-bHRUC8/Cgpa21LQigT5IxIw7OJAEZX8Y+2KJZI86nns=",
       "System.Collections.wasm": "sha256-5KiAHrRJXzeLp5Xmo1nKnWijAK6IKA8HzUqxulmwm8w=",
