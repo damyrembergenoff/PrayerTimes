@@ -124,7 +124,9 @@
     private void UpdateNextPrayerTime()
     {
         bool isPrayerTimeClose = false;
+        int n=0;
         TimeSpan timeDifference = TimeSpan.MaxValue, timeDiff2 = GetTimeDifferent(DateTime.Parse(timesdict!["Fajr"]), DateTime.Parse("00:00"));
+        key = "Fajr";
         foreach (var item in timesdict!)
         {
             if (DateTime.Parse(item.Value) > DateTime.Now)
@@ -134,21 +136,27 @@
                 {
                     timeDifference = diff;
                     key = item.Key;
-                    nextPrayerCountdown = $"{diff.Hours} soat {diff.Minutes} daqiqa";
+                    nextPrayerCountdown = $"{timeDifference.Hours} soat {timeDifference.Minutes} daqiqa";
                     isPrayerTimeClose = true;
                 }
+                n++;
             }
         }
-        if(timeDifference == TimeSpan.MaxValue)
+        if(n==0)
         {
             foreach(var item in timesdict)
             {
                 if(GetTimeDifferent(DateTime.Parse(item.Value), DateTime.Parse("00:00"))<timeDiff2)
+                {
                     timeDiff2 = GetTimeDifferent(DateTime.Parse("00:00"), DateTime.Parse(item.Value));
+                    key = item.Key;
+                }
             }
         timeDifference = timeDiff2 + GetTimeDifferent(DateTime.Parse("23:59")) + TimeSpan.Parse("00:01:00");
-        if(timeDiff2 >= TimeSpan.Parse("1"))
-            timeDiff2 = timeDiff2 - TimeSpan.Parse("1");
+        if(timeDifference >= TimeSpan.Parse("1"))
+            timeDifference = timeDiff2 - TimeSpan.Parse("1");
+
+        nextPrayerCountdown = $"{timeDifference.Hours} soat {timeDifference.Minutes} daqiqa";
         }
     }
 
