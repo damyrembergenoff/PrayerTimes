@@ -4,18 +4,19 @@
 
 @page "/"
 
-<MudContainer Style="background-image: url('https://github.com/damyrembergenoff/PrayerTimes/blob/master/wwwroot/images/Background2.jpg'); 
+<MudContainer Style="background-image: url('https://i.pinimg.com/736x/49/f4/66/49f46625ecf34d3f7071374d9bdb8007.jpg'); 
                      background-size: cover; 
                      background-repeat: no-repeat; 
                      background-position: center; 
                      height: 100vh;
-                     display: flex
-                     flex-direction: column
-                     justify-content: center
-                     align-items: center">
+                     display: flex;
+                     flex-direction: column;
+                     justify-content: flex-start;
+                     align-items: center;
+                     padding-top: 20px;">
     @if (_prayerTimes == null)
     {
-        <MudText Typo="Typo.h5" Align="Align.Center" Style="color: white;">Yuklanmoqda...</MudText>
+        <MudText Typo="Typo.h4" Style="color: white; margin-bottom: 20px;" />
     }
     else
     {
@@ -26,7 +27,7 @@
             {
                 <MudCard Class="my-2" 
                     Style="background-color: #167803;
-                        color: white; padding: 10px; border-radius: 8px; height: 8vh;">
+                        color: white; padding: 10px; border-radius: 8px; width: 97%; margin: 0 auto; height: 8vh;">
                     <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
                         <div Style="display: flex; align-items: center;">
                             <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
@@ -39,7 +40,7 @@
             {
                 <MudCard Class="my-2" 
                     Style="background-color: rgba(0, 0, 0, 0.7);
-                        color: white; padding: 10px; border-radius: 8px; height: 8vh;">
+                        color: white; padding: 10px; border-radius: 8px; width: 97%; margin: 0 auto; height: 8vh;">
                     <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
                         <div Style="display: flex; align-items: center;">
                             <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
@@ -78,12 +79,8 @@
            Href="https://t.me/damyr_embergenoff"
            Target="_blank"
            Style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #00B8D4; color: white;">
-    Send
-</MudButton>
-
-
-
-    @* <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton> *@
+        Send
+    </MudButton>
 </MudContainer>
 
 
@@ -95,11 +92,10 @@
     private string? key;
     private string nextPrayerCountdown = "";
 
-    // Sahifa yuklanganda avtomatik ravishda bu metodni chaqirish
     protected override async Task OnInitializedAsync()
     {
         await GetPrayerTimes();
-        StartTimer(); // Timerni boshlash
+        StartTimer();
     }
 
     private async Task GetPrayerTimes()
@@ -128,7 +124,7 @@
     private void UpdateNextPrayerTime()
     {
         bool isPrayerTimeClose = false;
-        TimeSpan timeDifference = TimeSpan.MaxValue;
+        TimeSpan timeDifference = TimeSpan.MaxValue, timeDiff2 = GetTimeDifferent(DateTime.Parse(timesdict!["Fajr"]), DateTime.Parse("00:00"));
         foreach (var item in timesdict!)
         {
             if (DateTime.Parse(item.Value) > DateTime.Now)
@@ -143,11 +139,24 @@
                 }
             }
         }
+        if(timeDifference == TimeSpan.MaxValue)
+        {
+            foreach(var item in timesdict)
+            {
+                if(GetTimeDifferent(DateTime.Parse(item.Value), DateTime.Parse("00:00"))<timeDiff2)
+                    timeDiff2 = GetTimeDifferent(DateTime.Parse("00:00"), DateTime.Parse(item.Value));
+            }
+        timeDifference = timeDiff2 + GetTimeDifferent(DateTime.Parse("23:59")) + TimeSpan.Parse("00:01:00");
+        if(timeDiff2 >= TimeSpan.Parse("1"))
+            timeDiff2 = timeDiff2 - TimeSpan.Parse("1");
+        }
     }
 
-    private TimeSpan GetTimeDifferent(DateTime inputTime)
+    private TimeSpan GetTimeDifferent(DateTime inputTime, DateTime now = default)
     {
-        return inputTime - DateTime.Now;
+        if(now == default)
+            now = DateTime.Now;
+        return inputTime - now;
     }
 
     private void StartTimer()
@@ -158,12 +167,12 @@
     private void UpdateCurrentTime(object? state)
     {
         currentTime = DateTime.Now.ToString("HH:mm:ss");
-        UpdateNextPrayerTime(); // Har soniyada eng yaqin namozni yangilash
-        InvokeAsync(StateHasChanged); // UI ni yangilash
+        UpdateNextPrayerTime();
+        InvokeAsync(StateHasChanged); 
     }
 
     public void Dispose()
     {
-        timer?.Dispose(); // Timerni tozalash
+        timer?.Dispose(); 
     }
 }
