@@ -14,83 +14,70 @@
                      justify-content: flex-start;
                      align-items: center;
                      padding-top: 20px;">
-    @if (_prayerTimes == null)
+    @if(timesdict is not null)
     {
-        <MudText Typo="Typo.h4" Style="color: white; margin-bottom: 20px;" />
-    }
-    else
-    {
-        @foreach (var item in timesdict!)
+        @foreach (var item in timesdict)
         {
-            bool isTimeClose = (item.Key == key); 
-            if(isTimeClose)
-            {
-                <MudCard Class="my-2" 
-                    Style="background-color: #167803;
-                        color: white; padding: 10px; border-radius: 8px; width: 97%; margin: 0 auto; height: 8vh;">
-                    <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
-                        <div Style="display: flex; align-items: center;">
-                            <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
-                        </div>
-                        <MudText Typo="Typo.h5" Style="margin: 0;">@item.Value</MudText>
-                    </MudCardContent>
-                </MudCard>
-            }
-            else
-            {
-                <MudCard Class="my-2" 
-                    Style="background-color: rgba(0, 0, 0, 0.7);
-                        color: white; padding: 10px; border-radius: 8px; width: 97%; margin: 0 auto; height: 8vh;">
-                    <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
-                        <div Style="display: flex; align-items: center;">
-                            <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
-                        </div>
-                        <MudText Typo="Typo.h5" Style="margin: 0;">@item.Value</MudText>
-                    </MudCardContent>
-                </MudCard>
-            }
+            bool isTimeClose = (item.Key == nextPrayerKey);
+            <MudCard Class="my-2" 
+                     Style="@GetCardStyle(isTimeClose)">
+                <MudCardContent Style="display: flex; align-items: center; justify-content: space-between; height: 100%;">
+                    <MudText Typo="Typo.h5" Style="margin: 0;">@item.Key</MudText>
+                    <MudText Typo="Typo.h5" Style="margin: 0;">@item.Value</MudText>
+                </MudCardContent>
+            </MudCard>
         }
-        <MudCard Class="my-2" 
-         Style="background-color: rgb(250, 242, 2);
-                color: rgb(0, 0, 0); 
-                padding: 10px; 
-                border-radius: 8px; 
-                height: 15vh; 
-                width: 100%; 
-                position: absolute; 
-                bottom: 60px; 
-                left: 0; 
-                box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);">
-            <MudCardContent Style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 120%;">
-                <MudText Typo="Typo.h4" Style="font-family: 'Roboto', sans-serif; font-weight: bold;">Keyingi   namoz: @key</MudText>
-                <MudText Typo="Typo.h6" Align="Align.Center" Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
-                    @nextPrayerCountdown dan keyin
-                </MudText>
-                <MudText Typo="Typo.h6" Align="Align.Center" Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
-                    Hozirgi  vaqt: @currentTime
-                </MudText>
-            </MudCardContent>
-        </MudCard>
     }
+    <MudCard Class="my-2" 
+        Style="background-color: rgb(250, 242, 2);
+               color: rgb(0, 0, 0); 
+               padding: 10px; 
+               border-radius: 8px; 
+               height: 15vh; 
+               width: 100%; 
+               position: absolute; 
+               bottom: 60px; 
+               left: 0; 
+               box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.5);">
+        <MudCardContent Style="display: flex; flex-direction: column; justify-content: center; align-items: center; height: 120%;">
+            <MudText Typo="Typo.h4" Style="font-family: 'Roboto', sans-serif; font-weight: bold;">
+                Keyingi namoz: @nextPrayerKey
+            </MudText>
+            <MudText Typo="Typo.h6" Align="Align.Center" 
+                     Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
+                @nextPrayerCountdown dan keyin
+            </MudText>
+            <MudText Typo="Typo.h6" Align="Align.Center" 
+                     Style="font-family: 'Roboto', sans-serif; text-align: center; font-weight: bold;">
+                Hozirgi vaqt: @currentTime
+            </MudText>
+        </MudCardContent>
+    </MudCard>
 
     <MudButton Variant="Variant.Filled" 
-           EndIcon="@Icons.Material.Filled.Send" 
-           Color="Color.Info"
-           Href="https://t.me/damyr_embergenoff"
-           Target="_blank"
-           Style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #00B8D4; color: white;">
+               EndIcon="@Icons.Material.Filled.Send" 
+               Color="Color.Info"
+               Href="https://t.me/damyr_embergenoff"
+               Target="_blank"
+               Style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; background-color: #00B8D4; color: white;">
         Send
     </MudButton>
 </MudContainer>
 
-
 @code {
     private PrayerTimeService.PrayerTimes? _prayerTimes;
     private Dictionary<string, string>? timesdict;
+    private Dictionary<string, DateTime>? prayerTimesDict;
     private string currentTime = DateTime.Now.ToString("HH:mm:ss");
     private Timer? timer;
-    private string? key;
+    private string? nextPrayerKey;
     private string nextPrayerCountdown = "";
+
+    private string GetCardStyle(bool isTimeClose)
+    {
+        var backgroundColor = isTimeClose ? "#167803" : "rgba(0, 0, 0, 0.7)";
+        return $"background-color: {backgroundColor}; color: white; padding: 10px; border-radius: 8px; width: 97%; margin: 0 auto; height: 8vh;";
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -104,15 +91,19 @@
         {
             var (latitude, longitude) = await LocationService.GetUserLocationAsync();
             _prayerTimes = await PrayerTimeService.GetPrayerTimesAsync(latitude, longitude);
-            timesdict = new Dictionary<string, string>
+
+            prayerTimesDict = new Dictionary<string, DateTime>
             {
-                { "Fajr", _prayerTimes?.Fajr! },
-                { "Sunrise", _prayerTimes?.Sunrise! },
-                { "Dhuhr", _prayerTimes?.Dhuhr! },
-                { "Asr", _prayerTimes?.Asr! },
-                { "Maghrib", _prayerTimes?.Maghrib! },
-                { "Isha", _prayerTimes?.Isha! },
+                { "Fajr", DateTime.Parse(_prayerTimes?.Fajr!) },
+                { "Sunrise", DateTime.Parse(_prayerTimes?.Sunrise!) },
+                { "Dhuhr", DateTime.Parse(_prayerTimes?.Dhuhr!) },
+                { "Asr", DateTime.Parse(_prayerTimes?.Asr!) },
+                { "Maghrib", DateTime.Parse(_prayerTimes?.Maghrib!) },
+                { "Isha", DateTime.Parse(_prayerTimes?.Isha!) },
             };
+
+            timesdict = prayerTimesDict.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToString("HH:mm"));
+
             UpdateNextPrayerTime();
         }
         catch (Exception ex)
@@ -123,48 +114,33 @@
 
     private void UpdateNextPrayerTime()
     {
-        bool isPrayerTimeClose = false;
-        int n=0;
-        TimeSpan timeDifference = TimeSpan.MaxValue, timeDiff2 = GetTimeDifferent(DateTime.Parse(timesdict!["Fajr"]), DateTime.Parse("00:00"));
-        key = "Fajr";
-        foreach (var item in timesdict!)
+        if (prayerTimesDict == null)
+            return;
+
+        var now = DateTime.Now;
+        string[] prayerOrder = { "Fajr", "Sunrise", "Dhuhr", "Asr", "Maghrib", "Isha" };
+
+        nextPrayerKey = null;
+        DateTime nextTime = DateTime.MinValue;
+
+        foreach (var prayer in prayerOrder)
         {
-            if (DateTime.Parse(item.Value) > DateTime.Now)
+            if (prayerTimesDict.TryGetValue(prayer, out var prayerTime) && prayerTime > now)
             {
-                var diff = GetTimeDifferent(DateTime.Parse(item.Value));
-                if (isPrayerTimeClose is false || diff < timeDifference)
-                {
-                    timeDifference = diff;
-                    key = item.Key;
-                    nextPrayerCountdown = $"{timeDifference.Hours} soat {timeDifference.Minutes} daqiqa";
-                    isPrayerTimeClose = true;
-                }
-                n++;
+                nextPrayerKey = prayer;
+                nextTime = prayerTime;
+                break;
             }
         }
-        if(n==0)
+
+        if (nextPrayerKey == null)
         {
-            foreach(var item in timesdict)
-            {
-                if(GetTimeDifferent(DateTime.Parse(item.Value), DateTime.Parse("00:00"))<timeDiff2)
-                {
-                    timeDiff2 = GetTimeDifferent(DateTime.Parse("00:00"), DateTime.Parse(item.Value));
-                    key = item.Key;
-                }
-            }
-        timeDifference = timeDiff2 + GetTimeDifferent(DateTime.Parse("23:59")) + TimeSpan.Parse("00:01:00");
-        if(timeDifference >= TimeSpan.Parse("1"))
-            timeDifference = timeDiff2 - TimeSpan.Parse("1");
-
-        nextPrayerCountdown = $"{timeDifference.Hours} soat {timeDifference.Minutes} daqiqa";
+            nextPrayerKey = "Fajr";
+            nextTime = prayerTimesDict["Fajr"].AddDays(1);
         }
-    }
 
-    private TimeSpan GetTimeDifferent(DateTime inputTime, DateTime now = default)
-    {
-        if(now == default)
-            now = DateTime.Now;
-        return inputTime - now;
+        TimeSpan diff = nextTime - now;
+        nextPrayerCountdown = $"{diff.Hours} soat {diff.Minutes} daqiqa";
     }
 
     private void StartTimer()
@@ -174,13 +150,14 @@
 
     private void UpdateCurrentTime(object? state)
     {
-        currentTime = DateTime.Now.ToString("HH:mm:ss");
+        var now = DateTime.Now;
+        currentTime = now.ToString("HH:mm:ss");
         UpdateNextPrayerTime();
-        InvokeAsync(StateHasChanged); 
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        timer?.Dispose(); 
+        timer?.Dispose();
     }
 }
